@@ -45,8 +45,8 @@ public class FromStringWindow extends JFrame {
 
 	private MainWindow caller;
 	
-	private JTextField albumsToFind;
-	private JButton albumsToFindBtn;
+	private JTextField searchField;
+	private JButton searchBtn;
 	
 	private JList<File> left;
 	private JList<File> right;
@@ -139,27 +139,27 @@ public class FromStringWindow extends JFrame {
 		GroupLayoutCreator glc = new GroupLayoutCreator(topPanel, true);
 		
 		JLabel albumsToFindLabel = new JLabel("Search albums by name...");
-		albumsToFind = SwingUtils.defaultTextField(true, "");
-		albumsToFindBtn = new JButton("Search");
+		searchField = SwingUtils.defaultTextField(true, "");
+		searchBtn = new JButton("Search");
 		initTopPanelListeners();
 		
-		glc.addHorizontally(albumsToFindLabel, albumsToFind, albumsToFindBtn);
+		glc.addHorizontally(albumsToFindLabel, searchField, searchBtn);
 		glc.doLayout();
 		add(topPanel, BorderLayout.NORTH);
 	}
 
 	private void initTopPanelListeners() {
-		albumsToFind.addKeyListener(new KeyAdapter() {
+		searchField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
-					albumsToFindBtn.doClick();
+					searchBtn.doClick();
 			}
 		});
 		
-		albumsToFindBtn.addActionListener(evt -> {
+		searchBtn.addActionListener(evt -> {
 			FileListModel leftModel = ((FileListModel)left.getModel());
-			leftModel.updateActiveSet(albumsToFind.getText());
+			leftModel.updateActiveSet(searchField.getText());
 		});
 	}
 

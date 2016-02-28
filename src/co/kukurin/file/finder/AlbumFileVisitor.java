@@ -36,7 +36,6 @@ public class AlbumFileVisitor implements FileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 		// TODO check extension
-		// TODO check multiple levels of parents
 		
 		if(file.getParent() != null
 				&& pathsToInclude.contains(file.getParent().toString())) {
