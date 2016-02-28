@@ -1,4 +1,4 @@
-package co.kukurin.utils;
+package co.kukurin.utils.layout;
 
 import java.awt.Color;
 import java.awt.Dimension;

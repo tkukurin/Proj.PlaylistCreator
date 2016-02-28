@@ -1,5 +1,6 @@
 package co.kukurin.xml.items;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class Playlist {
 	@Element
 	private String title;
 	
-	@ElementList(name="trackList")
+	@ElementList(name="trackList", entry="track")
 	private List<Track> tracklist;
 	
 	public Playlist(String title) {
@@ -34,12 +35,20 @@ public class Playlist {
 		this.tracklist = tracklist;
 	}
 	
+	public boolean addAll(Collection<Track> tracks) {
+		return tracklist.addAll(tracks);
+	}
+	
 	public boolean add(Track track) {
 		return tracklist.add(track);
 	}
 	
 	public boolean add(String filepath) {
 		return add(new Track(filepath));
+	}
+	
+	public Track remove(int index) {
+		return tracklist.remove(index);
 	}
 	
 	public boolean remove(Track track) {
@@ -49,4 +58,9 @@ public class Playlist {
 	public boolean remove(String filepath) {
 		return remove(new Track(filepath));
 	}
+
+	public List<Track> getTracklist() {
+		return tracklist;
+	}
+
 }

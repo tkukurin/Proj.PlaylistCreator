@@ -1,7 +1,7 @@
 package co.kukurin.main;
 
-import co.kukurin.gui.MainWindow;
-import co.kukurin.utils.SwingUtils;
+import co.kukurin.gui.main.MainWindow;
+import co.kukurin.utils.layout.SwingUtils;
 
 /**
  * Program entry point; simply calls the {@link MainWindow} class.

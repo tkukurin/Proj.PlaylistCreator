@@ -10,7 +10,6 @@ import co.kukurin.utils.Constants;
 @Root
 public class Track {
 	
-	// TODO currently has no purpose
 	private File file;
 
 	@Element
@@ -31,6 +30,11 @@ public class Track {
 		
 		getFileMetadata();
 	}
+	
+	public Track(String location, String title) {
+		this.location = location;
+		this.title = title;
+	}
 
 	private void getFileMetadata() {
 		this.title = file.getName();
@@ -38,6 +42,10 @@ public class Track {
 		int extensionIndex = title.indexOf('.');
 		if(extensionIndex > 0)
 			this.title = this.title.substring(0, extensionIndex);
+	}
+	
+	public File getFile() {
+		return file;
 	}
 
 	@Override
@@ -63,6 +71,11 @@ public class Track {
 		} else if (!file.equals(other.file))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return title;
 	}
 	
 }

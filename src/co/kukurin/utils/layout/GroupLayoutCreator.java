@@ -1,4 +1,4 @@
-package co.kukurin.utils;
+package co.kukurin.utils.layout;
 
 import java.awt.Component;
 import java.awt.Container;

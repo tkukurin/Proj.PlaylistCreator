@@ -1,16 +1,12 @@
-package co.kukurin.gui;
+package co.kukurin.gui.main;
 
 import java.awt.BorderLayout;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -18,14 +14,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import co.kukurin.file.finder.AlbumFileVisitor;
+import co.kukurin.gui.FromStringWindow;
 import co.kukurin.utils.Constants;
-import co.kukurin.utils.GroupLayoutCreator;
-import co.kukurin.utils.SwingUtils;
-import co.kukurin.xml.XMLPlaylistUtils;
+import co.kukurin.utils.PropertyManager;
+import co.kukurin.utils.layout.GroupLayoutCreator;
+import co.kukurin.utils.layout.SwingUtils;
 
 /**
  * Main program window.
@@ -35,7 +33,8 @@ import co.kukurin.xml.XMLPlaylistUtils;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 	
-	private Properties properties;
+	private JPlaylistComponent playlist;
+	
 	
 	private JTextField baseLocation;
 	private JTextField albumLocations;
@@ -44,48 +43,34 @@ public class MainWindow extends JFrame {
 	public MainWindow() {
 		SwingUtils.setWindowsLookAndFeel();
 		
-		loadProperties();
-		initGui();
-		
-		SwingUtils.instanceDefaults(this);
-		
+		setJMenuBar(MainMenu.init(this));
 		setTitle(Constants.PROGRAM_TITLE);
-		setResizable(false);
+		//setResizable(false);
+		
+		initGui();
+		SwingUtils.instanceDefaults(this);
 		setLocationRelativeTo(null);
 	}
 	
-	private void loadProperties() {
-		this.properties = new Properties();
-		
-		try {
-			properties.load(new FileInputStream(new File(Constants.PROPERTY_LOCATION)));
-		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(this, "Error loading property file!");
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Unhandled error: " + e);
-		}
-	}
-	
-	private void storeProperties() {
-		try {
-			properties.store(new FileOutputStream(new File(Constants.PROPERTY_LOCATION)), "");
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error writing to property file!");
-		}
-	}
-
 	private void initGui() {
-		JPanel itemContainer = new JPanel();
+		JLabel playlistLabel = new JLabel("Playlist items:");
+		playlistLabel.setLabelFor(playlist);
+		add(playlistLabel, BorderLayout.NORTH);
 		
-		GroupLayoutCreator glc = new GroupLayoutCreator(itemContainer, true);
-		glc.setLinkColumn(0, 2);
+		playlist = new JPlaylistComponent();
+		add(new JScrollPane(playlist), BorderLayout.CENTER);
 		
-		initBaseLocationInput(glc);
-		initAlbumsInput(glc);
-		initPlaylistNameInput(glc);
-		
-		glc.doLayout();
-		add(itemContainer, BorderLayout.NORTH);
+//		JPanel itemContainer = new JPanel();
+//
+//		GroupLayoutCreator glc = new GroupLayoutCreator(itemContainer, true);
+//		glc.setLinkColumn(0, 2);
+//
+//		initBaseLocationInput(glc);
+//		initAlbumsInput(glc);
+//		initPlaylistNameInput(glc);
+//
+//		glc.doLayout();
+//		add(itemContainer, BorderLayout.NORTH);
 	}
 	
 	/**
@@ -93,7 +78,7 @@ public class MainWindow extends JFrame {
 	 * @param glc
 	 */
 	private void initBaseLocationInput(GroupLayoutCreator glc) {
-		baseLocation = setupTextarea(properties.getProperty(Constants.PROPERTY_BASEDIR));
+		baseLocation = setupTextarea(PropertyManager.get(Constants.PROPERTY_BASEDIR));
 		JButton musicLocationBtn = initBaseLocationBtn();
 		
 		JPanel mlMidPanel = new JPanel(new BorderLayout());
@@ -101,7 +86,7 @@ public class MainWindow extends JFrame {
 		mlMidPanel.add(musicLocationBtn, BorderLayout.EAST);
 		
 		JButton storePropertiesBtn = new JButton("Save base location");
-		storePropertiesBtn.addActionListener(evt -> storeProperties());
+		storePropertiesBtn.addActionListener(evt -> PropertyManager.store(this));
 		
 		glc.addHorizontally(new JLabel("Base Location"), mlMidPanel, storePropertiesBtn);
 	}
@@ -111,7 +96,7 @@ public class MainWindow extends JFrame {
 		
 		openBtn.addActionListener(evt -> {
 			showDialogAndUpdateTextField(baseLocation);
-			properties.setProperty(Constants.PROPERTY_BASEDIR, baseLocation.getText());
+			PropertyManager.put(Constants.PROPERTY_BASEDIR, baseLocation.getText());
 		});
 		
 		return openBtn;
@@ -202,7 +187,7 @@ public class MainWindow extends JFrame {
 			});
 			
 			try {
-				XMLPlaylistUtils.createPlaylist(afv.getCreatedPlaylist(), playlistNameStr);
+				// XMLPlaylistUtils.createPlaylist(afv.getCreatedPlaylist(), playlistNameStr);
 			} catch (Exception e) {
 				displayMessage("Playlist creation failed: " + e.getLocalizedMessage());
 				return;
@@ -250,24 +235,22 @@ public class MainWindow extends JFrame {
 	}
 	
 	/**
-	 * @return {@link #baseLocation} as directory or list of directories separated by
-	 * {@link File#pathSeparator}.
-	 */
-	public String getBaseLocationStr() {
-		return baseLocation.getText();
-	}
-	
-	/**
 	 * Adds given file to the list of albums currently in the playlist.
 	 * @param file
 	 */
 	public void addAlbum(File file) {
-		String prepend = albumLocations.getText();
+		try {
+			playlist.addAlbum(file.toPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
-		if(!prepend.isEmpty())
-			prepend += File.pathSeparator;
-		
-		albumLocations.setText(prepend + file.toString());
+//		String prepend = albumLocations.getText();
+//
+//		if(!prepend.isEmpty())
+//			prepend += File.pathSeparator;
+//
+//		albumLocations.setText(prepend + file.toString());
 	}
 	
 	private boolean containsEmptyString(String ... str) {
@@ -281,6 +264,26 @@ public class MainWindow extends JFrame {
 		return false;
 	}
 
+	public void displayFromStringWindow() {
+		SwingUtilities.invokeLater(() -> new FromStringWindow(this));
+	}
+	
+	public void openPlaylist(File f) {
+		try {
+			playlist.loadPlaylist(f);
+		} catch (Exception e) {
+			displayMessage("Error opening playlist: " + e);
+		}
+	}
+
+	public void storeCurrentPlaylist(File f) {
+		try {
+			playlist.storePlaylist(f.toPath());
+		} catch (Exception e) {
+			displayMessage("Error writing playlist: " + e);
+		}
+	}
+	
 	private void displayMessage(String msg) {
 		JOptionPane.showMessageDialog(this, msg);
 	}

@@ -27,9 +27,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import co.kukurin.gui.main.MainWindow;
 import co.kukurin.gui.model.FileListModel;
-import co.kukurin.utils.SwingUtils;
-import co.kukurin.utils.GroupLayoutCreator;
+import co.kukurin.utils.Constants;
+import co.kukurin.utils.PropertyManager;
+import co.kukurin.utils.layout.GroupLayoutCreator;
+import co.kukurin.utils.layout.SwingUtils;
 
 /**
  * Window opened when the "From String" button is clicked in the main
@@ -165,7 +168,7 @@ public class FromStringWindow extends JFrame {
 
 	private void populateLeftList() {
 		FileListModel leftModel = (FileListModel) left.getModel();
-		String baseLocStr = caller.getBaseLocationStr();
+		String baseLocStr = PropertyManager.get(Constants.PROPERTY_BASEDIR);
 		
 		for(String token : baseLocStr.split(File.pathSeparator)) {
 			try {
