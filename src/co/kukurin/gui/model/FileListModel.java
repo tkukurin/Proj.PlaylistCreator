@@ -2,11 +2,10 @@ package co.kukurin.gui.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import javax.swing.ListModel;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
+import javax.swing.AbstractListModel;
 
 /**
  * Basic {@link ListModel} containing a list of file items and offering basic add/remove options.
@@ -16,17 +15,15 @@ import javax.swing.event.ListDataListener;
  * @author Toni Kukurin
  *
  */
-public class FileListModel implements ListModel<File> {
+@SuppressWarnings("serial")
+public class FileListModel extends AbstractListModel<File> {
 	
-	private List<ListDataListener> listeners;
 	private List<File> files;
 	private List<File> activeFiles;
 	
 	public FileListModel() {
 		this.files = new ArrayList<>();
 		this.activeFiles = files;
-		
-		this.listeners = new ArrayList<>();
 	}
 
 	@Override
@@ -38,24 +35,18 @@ public class FileListModel implements ListModel<File> {
 	public File getElementAt(int index) {
 		return activeFiles.get(index);
 	}
-
-	@Override
-	public void addListDataListener(ListDataListener l) {
-		listeners.add(l);
-	}
-
-	@Override
-	public void removeListDataListener(ListDataListener l) {
-		listeners.remove(l);
+	
+	public void addAll(Collection<File> files) {
+		int oldsiz = this.files.size();
+		this.files.addAll(files);
+		
+		fireIntervalAdded(this, oldsiz, this.files.size() - 1);
 	}
 	
 	public boolean add(File f) {
 		boolean val = files.add(f);
-		
-		if(val) {
-			listeners.forEach(l -> l.intervalAdded(
-					new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, files.size() - 1, files.size() - 1)));
-		}
+		if(val)
+			fireIntervalAdded(this, files.size() - 1, files.size() - 1);
 		
 		return val;
 	}
@@ -64,14 +55,17 @@ public class FileListModel implements ListModel<File> {
 		return activeFiles;
 	}
 	
+	public Collection<File> getEntireFileset() {
+		return files;
+	}
+	
 	public boolean remove(File f) {
 		for(int i = 0; i < files.size(); i++) {
 			if(files.get(i).equals(f)) {
 				files.remove(i);
 				
 				final int idx = i;
-				listeners.forEach(l -> l.intervalRemoved(
-						new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, idx, idx)));
+				fireIntervalRemoved(this, idx, idx);
 				
 				return true;
 			}
@@ -112,8 +106,7 @@ public class FileListModel implements ListModel<File> {
 			});
 		}
 		
-		listeners.forEach(l -> l.contentsChanged(
-				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, activeFiles.size() - 1)));
+		fireContentsChanged(this, 0, activeFiles.size() - 1);
 	}
 
 }

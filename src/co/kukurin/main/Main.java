@@ -14,6 +14,7 @@ public class Main {
 	 * @param args Not used.
 	 */
 	public static void main(String[] args) {
+		SwingUtils.setWindowsLookAndFeel();
 		SwingUtils.doStartup(MainWindow.class);
 	}
 

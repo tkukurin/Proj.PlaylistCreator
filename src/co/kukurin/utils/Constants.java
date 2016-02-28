@@ -28,6 +28,7 @@ public class Constants {
 	public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 12);
 
 	// Properties
-	public static final String PROPERTY_BASEDIR = "music.location";
+	public static final String PROPERTY_SAVE_LOCATION = "save.location";
+	public static final String PROPERTY_OPEN_LOCATION = "open.location";
 
 }

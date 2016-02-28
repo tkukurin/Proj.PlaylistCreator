@@ -25,6 +25,14 @@ public class Playlist {
 	@ElementList(name="trackList", entry="track")
 	private List<Track> tracklist;
 	
+	/**
+	 * Necessary for serialization, otherwise shouldn't be used as
+	 * the title is not set by using this constructor.
+	 */
+	public Playlist() {
+		this("");
+	}
+	
 	public Playlist(String title) {
 		this.title = title;
 		this.tracklist = new LinkedList<>();

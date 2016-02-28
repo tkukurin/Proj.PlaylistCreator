@@ -1,9 +1,11 @@
 package co.kukurin.xml.items;
 
+import java.beans.ConstructorProperties;
 import java.io.File;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
+import org.simpleframework.xml.core.Commit;
 
 import co.kukurin.utils.Constants;
 
@@ -18,6 +20,22 @@ public class Track {
 	@Element
 	private String title;
 	
+	/**
+	 * Necessary for serialization, otherwise should not be used.
+	 */
+	public Track() {}
+	
+	/**
+	 * Serialization commit, occurs after all XML data has been parsed.
+	 */
+	@Commit public void commit() {
+		final String checkStart = Constants.VLC_FILE_PREFIX;
+		int checkStartLen = checkStart.length();
+		
+		if(this.location.startsWith(checkStart))
+			this.file = new File(this.location.substring(checkStartLen));
+	}
+	
 	public Track(File f) {
 		this(f.getAbsolutePath());
 	}
@@ -31,6 +49,7 @@ public class Track {
 		getFileMetadata();
 	}
 	
+	@ConstructorProperties({"location", "title"})
 	public Track(String location, String title) {
 		this.location = location;
 		this.title = title;
@@ -39,7 +58,7 @@ public class Track {
 	private void getFileMetadata() {
 		this.title = file.getName();
 		
-		int extensionIndex = title.indexOf('.');
+		int extensionIndex = title.lastIndexOf('.');
 		if(extensionIndex > 0)
 			this.title = this.title.substring(0, extensionIndex);
 	}

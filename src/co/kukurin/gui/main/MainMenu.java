@@ -74,12 +74,11 @@ public class MainMenu {
 		activeMenu = file;
 		
 		createAndAdd("New", "ctrl N", e-> {
-			
-			
+			caller.newPlaylist();
 		});
 		
 		createAndAdd("Open", "ctrl O", e-> {
-			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_BASEDIR));
+			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION));
 			int result = chooser.showOpenDialog(caller);
 			
 			if(result != JFileChooser.APPROVE_OPTION)
@@ -90,7 +89,7 @@ public class MainMenu {
 		});
 		
 		createAndAdd("Save", "ctrl S", e -> {
-			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_BASEDIR));
+			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION));
 			int result = chooser.showSaveDialog(caller);
 			
 			if(result != JFileChooser.APPROVE_OPTION)
@@ -112,7 +111,7 @@ public class MainMenu {
 		});
 		
 		createAndAdd("Remove album", "ctrl alt R", e -> {
-			
+			caller.displayAlbumRemovalWindow();
 		});
 		
 		createAndAdd("Group by folder", "ctrl alt G", e-> {
