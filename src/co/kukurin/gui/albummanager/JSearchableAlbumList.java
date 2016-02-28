@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -26,7 +28,8 @@ import co.kukurin.utils.layout.GroupLayoutCreator;
 @SuppressWarnings("serial")
 public class JSearchableAlbumList extends JPanel {
 
-	private static final String SEARCH_IN_LIST = "Press Enter to search:";
+	private static final String TOOLTIP_TEXT = "Empty string will display all entries";
+	private static final String SEARCH_IN_LIST = "Type query to search:";
 	
 	private JLabel label;
 	private JTextField searchField;
@@ -58,11 +61,11 @@ public class JSearchableAlbumList extends JPanel {
 	}
 	
 	private void initSearchField() {
+		searchField.setToolTipText(TOOLTIP_TEXT);
 		searchField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER)
-					((FileListModel)fileList.getModel()).updateActiveSet(searchField.getText());
+				((FileListModel)fileList.getModel()).updateActiveSet(searchField.getText());
 			}
 		});
 	}
@@ -83,10 +86,19 @@ public class JSearchableAlbumList extends JPanel {
 		FileListModel model = (FileListModel) fileList.getModel();
 		
 		Files.walkFileTree(p.toPath(), new SimpleFileVisitor<Path>() {
+			Set<Path> containsFiles = new HashSet<>();
+			
 			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				model.add(dir.toFile());
-				return FileVisitResult.CONTINUE;
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				containsFiles.add(file.getParent());
+				return super.visitFile(file, attrs);
+			}
+			
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if(containsFiles.contains(dir))
+					model.add(dir.toFile());
+				return super.postVisitDirectory(dir, exc);
 			}
 		});
 	}

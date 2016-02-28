@@ -10,7 +10,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
+import co.kukurin.gui.inputscreen.InputScreenWindow;
 import co.kukurin.utils.Constants;
 import co.kukurin.utils.PropertyManager;
 
@@ -27,7 +29,7 @@ public class MainMenu {
 	 * @author Toni Kukurin
 	 *
 	 */
-	private static abstract class DefaultMenuAction extends AbstractAction {
+	public static abstract class DefaultMenuAction extends AbstractAction {
 		public DefaultMenuAction(String name, String key) {
 			Objects.requireNonNull(name, "name must be a valid string!");
 			Objects.requireNonNull(key, "a key combination must be provded");
@@ -69,15 +71,19 @@ public class MainMenu {
 		return newBar;
 	}
 	
+	/**
+	 * @param caller
+	 * @return file menu
+	 */
 	private static JMenu fileMenu(MainWindow caller) {
 		JMenu file = new JMenu("File");
 		activeMenu = file;
 		
-		createAndAdd("New", "ctrl N", e-> {
+		createAndAdd("New", "ctrl N", e -> {
 			caller.newPlaylist();
 		});
 		
-		createAndAdd("Open", "ctrl O", e-> {
+		createAndAdd("Open", "ctrl O", e -> {
 			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION));
 			int result = chooser.showOpenDialog(caller);
 			
@@ -102,31 +108,36 @@ public class MainMenu {
 		return file;
 	}
 	
+	/**
+	 * @param caller
+	 * @return playlist menu.
+	 */
 	private static JMenu playlistMenu(MainWindow caller) {
 		JMenu playlist = new JMenu("Playlist");
 		activeMenu = playlist;
 		
-		createAndAdd("Add album", "ctrl alt A", e -> {
-			caller.displayFromStringWindow();
+		createAndAdd("Manage albums", "ctrl M", e -> {
+			caller.displayAlbumManager();
 		});
 		
-		createAndAdd("Remove album", "ctrl alt R", e -> {
-			caller.displayAlbumRemovalWindow();
-		});
-		
-		createAndAdd("Group by folder", "ctrl alt G", e-> {
-			
-		});
+		// TODO ?
+//		createAndAdd("Group by folder", "ctrl alt G", e-> {
+//
+//		});
 		
 		return playlist;
 	}
 	
+	/**
+	 * @param caller
+	 * @return properties menu
+	 */
 	private static JMenu propertiesMenu(MainWindow caller) {
 		JMenu properties = new JMenu("Properties");
 		activeMenu = properties;
 		
-		createAndAdd("Switch default music folder", "", e -> {
-			
+		createAndAdd("Edit default folders", "ctrl P", e -> {
+			SwingUtilities.invokeLater(() -> new InputScreenWindow().setLocationRelativeTo(caller));
 		});
 		
 		return properties;

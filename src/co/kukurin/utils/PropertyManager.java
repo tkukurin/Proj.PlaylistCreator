@@ -5,15 +5,31 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+/**
+ * Static class used to manage properties.
+ * <p>
+ * The properties are loaded as defined in the {@link Constants} class.
+ * 
+ * @author Toni Kukurin
+ *
+ */
 public class PropertyManager {
 
+	/**
+	 * Non-instantiable
+	 */
 	private PropertyManager() {}
 	
+	/**
+	 * Properties accessible via this class.
+	 */
 	private static Properties properties;
 	
 	static {
@@ -21,16 +37,37 @@ public class PropertyManager {
 		catch (Exception ignore) {}
 	}
 	
-	public static void create() {
+	/**
+	 * Creates a new property list.
+	 */
+	public static void createDefaultProperties() {
 		properties = new Properties();
+		properties.put(Constants.PROPERTY_OPEN_LOCATION, "");
+		properties.put(Constants.PROPERTY_SAVE_LOCATION, "");
 	}
 	
+	/**
+	 * Loads properties from the default location.
+	 * 
+	 * @return Loaded properties.
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	public static Properties load() throws FileNotFoundException, IOException {
 		Properties properties = new Properties();
 		properties.load(new FileInputStream(new File(Constants.PROPERTY_LOCATION)));
 		return properties;
 	}
 	
+	/**
+	 * Loads properties from the default location.
+	 * <p>
+	 * In case of error, displays it in a {@link JOptionPane} relative to caller.
+	 * 
+	 * @param caller
+	 * @return Loaded properties.
+	 */
 	public static Properties load(JFrame caller) {
 		try {
 			Properties p = load();
@@ -44,6 +81,13 @@ public class PropertyManager {
 		return null;
 	}
 	
+	/**
+	 * Stores the current state of properties into the default location.
+	 * <p>
+	 * In case of error, displays it in a {@link JOptionPane} relative to caller.
+	 * 
+	 * @param caller
+	 */
 	public static void store(JFrame caller) {
 		try {
 			if(properties != null)
@@ -69,4 +113,11 @@ public class PropertyManager {
 			properties.put(key, value);
 	}
 	
+	public static Enumeration<Object> getKeys() {
+		return properties.keys();
+	}
+	
+	public static Collection<Object> getValues() {
+		return properties.values();
+	}
 }

@@ -22,24 +22,12 @@ public class SwingUtils {
 	/**
 	 * Default program-wide margin.
 	 */
-	private static final int DEFAULT_MARGIN = 10;
+	private static final int DEFAULT_MARGIN = 8;
 
 	/**
 	 * Ensures static access.
 	 */
 	private SwingUtils() {}
-	
-	/**
-	 * Default screen dimension.
-	 */
-	@SuppressWarnings("unused")
-	private static final Dimension DEFAULT_DIMENSION = new Dimension(640, 480);
-	
-	/**
-	 * Min dimension for the screen.
-	 */
-	@SuppressWarnings("unused")
-	private static final Dimension MIN_DIMENSION = new Dimension(480, 320);
 
 	/**
 	 * Set up default Windows look and feel if available;
@@ -71,10 +59,18 @@ public class SwingUtils {
 	 */
 	public static void instanceDefaults(JFrame mainView) {
 		mainView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		//mainView.getContentPane().setPreferredSize(DEFAULT_DIMENSION);
-		//mainView.setMinimumSize(MIN_DIMENSION);
 		mainView.pack();
 		mainView.setVisible(true);
+	}
+	
+	/**
+	 * @param mainView
+	 * @param preferredWidth Frame preferred width.
+	 * @param preferredHeight Frame preferred height.
+	 */
+	public static void instanceDefaults(JFrame mainView, int preferredWidth, int preferredHeight) {
+		mainView.getContentPane().setPreferredSize(new Dimension(preferredWidth, preferredHeight));
+		instanceDefaults(mainView);
 	}
 	
 	/**

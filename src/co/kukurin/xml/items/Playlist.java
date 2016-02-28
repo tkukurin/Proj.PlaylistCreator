@@ -11,6 +11,14 @@ import org.simpleframework.xml.NamespaceList;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Version;
 
+/**
+ * (De)serializable class ready to be used as an XML object.
+ * <p>
+ * The class represents a default Playlist document with necessary info.
+ * 
+ * @author Toni Kukurin
+ *
+ */
 @Root
 @NamespaceList({
 	@Namespace(reference="http://xspf.org/ns/0/"),
@@ -33,16 +41,26 @@ public class Playlist {
 		this("");
 	}
 	
+	/**
+	 * Instantiates a title and empty tracklist.
+	 * @param title Playlist title
+	 */
 	public Playlist(String title) {
 		this.title = title;
 		this.tracklist = new LinkedList<>();
 	}
 	
+	/**
+	 * Instantiates a title and tracklist as given.
+	 * @param title Playlist title
+	 * @param tracklist Tracklist to be associated with the playlist
+	 */
 	public Playlist(String title, List<Track> tracklist) {
 		this.title = title;
 		this.tracklist = tracklist;
 	}
 	
+	// addition
 	public boolean addAll(Collection<Track> tracks) {
 		return tracklist.addAll(tracks);
 	}
@@ -55,6 +73,7 @@ public class Playlist {
 		return add(new Track(filepath));
 	}
 	
+	// removal
 	public Track remove(int index) {
 		return tracklist.remove(index);
 	}
@@ -67,6 +86,9 @@ public class Playlist {
 		return remove(new Track(filepath));
 	}
 
+	/**
+	 * @return current tracklist.
+	 */
 	public List<Track> getTracklist() {
 		return tracklist;
 	}

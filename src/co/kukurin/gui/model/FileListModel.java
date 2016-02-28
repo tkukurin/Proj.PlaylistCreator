@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.AbstractListModel;
-
 /**
  * Basic {@link ListModel} containing a list of file items and offering basic add/remove options.
  * The model additionally keeps track of an "active set" of items which at any given moment
@@ -16,14 +14,14 @@ import javax.swing.AbstractListModel;
  *
  */
 @SuppressWarnings("serial")
-public class FileListModel extends AbstractListModel<File> {
+public class FileListModel extends UpdateableListModel<File> {
 	
-	private List<File> files;
 	private List<File> activeFiles;
+	private String lastFilter;
 	
 	public FileListModel() {
-		this.files = new ArrayList<>();
-		this.activeFiles = files;
+		this.activeFiles = this.items;
+		lastFilter = null;
 	}
 
 	@Override
@@ -36,42 +34,22 @@ public class FileListModel extends AbstractListModel<File> {
 		return activeFiles.get(index);
 	}
 	
-	public void addAll(Collection<File> files) {
-		int oldsiz = this.files.size();
-		this.files.addAll(files);
-		
-		fireIntervalAdded(this, oldsiz, this.files.size() - 1);
-	}
-	
-	public boolean add(File f) {
-		boolean val = files.add(f);
-		if(val)
-			fireIntervalAdded(this, files.size() - 1, files.size() - 1);
-		
-		return val;
-	}
-	
 	public List<File> getActiveFileset() {
 		return activeFiles;
 	}
 	
 	public Collection<File> getEntireFileset() {
-		return files;
+		return items;
 	}
 	
-	public boolean remove(File f) {
-		for(int i = 0; i < files.size(); i++) {
-			if(files.get(i).equals(f)) {
-				files.remove(i);
-				
-				final int idx = i;
-				fireIntervalRemoved(this, idx, idx);
-				
-				return true;
-			}
-		}
-		
-		return false;
+	@Override
+	protected void addCallback() {
+		updateActiveSet(lastFilter);
+	}
+	
+	@Override
+	protected void removeCallback() {
+		updateActiveSet(lastFilter);
 	}
 	
 	/**
@@ -84,13 +62,13 @@ public class FileListModel extends AbstractListModel<File> {
 	 */
 	public void updateActiveSet(String s) {
 		if(s == null || s.isEmpty()) {
-			this.activeFiles = files;
+			this.activeFiles = items;
 		} else {
 			s = s.toLowerCase();
 			final String[] tokens = s.split("\\s+");
 			
 			this.activeFiles = new ArrayList<>();
-			files.forEach(file -> {
+			items.forEach(file -> {
 				boolean matching = true;
 				String lowercaseFilename = file.toString().toLowerCase();
 				
@@ -106,6 +84,7 @@ public class FileListModel extends AbstractListModel<File> {
 			});
 		}
 		
+		lastFilter = s;
 		fireContentsChanged(this, 0, activeFiles.size() - 1);
 	}
 

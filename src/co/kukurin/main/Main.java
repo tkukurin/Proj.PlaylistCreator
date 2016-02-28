@@ -1,6 +1,7 @@
 package co.kukurin.main;
 
 import co.kukurin.gui.main.MainWindow;
+import co.kukurin.utils.PropertyManager;
 import co.kukurin.utils.layout.SwingUtils;
 
 /**
@@ -14,6 +15,9 @@ public class Main {
 	 * @param args Not used.
 	 */
 	public static void main(String[] args) {
+		if(!PropertyManager.hasValidProperties())
+			PropertyManager.createDefaultProperties();
+		
 		SwingUtils.setWindowsLookAndFeel();
 		SwingUtils.doStartup(MainWindow.class);
 	}

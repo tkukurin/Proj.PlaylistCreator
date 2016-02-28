@@ -20,7 +20,10 @@ import co.kukurin.utils.PropertyManager;
 import co.kukurin.utils.layout.SwingUtils;
 
 /**
- * Manager for the current album set.
+ * Manager window for the currently opened album set.
+ * <p>
+ * The manager receives all its data from static classes and the main window provided
+ * via constructor; main content is being represented via {@link JSearchableAlbumList} instances.
  * 
  * @author Toni Kukurin
  *
@@ -35,11 +38,15 @@ public class AlbumManagerWindow extends JFrame {
 	
 	private JButton saveBtn;
 	
+	/**
+	 * Close operation; returns focus to and enables the caller.
+	 */
 	private WindowAdapter closeOp = new WindowAdapter() {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			caller.setEnabled(true);
 			caller.requestFocus();
+			
 			AlbumManagerWindow.this.dispose();
 		}
 	};
@@ -58,27 +65,11 @@ public class AlbumManagerWindow extends JFrame {
 	private void initGui() throws IOException {
 		setLayout(new BorderLayout());
 		
-		initMidPanel();
+		initMainPanel();
 		initBottomPanel();
 	}
 
-	private void initBottomPanel() {
-		saveBtn = new JButton("Save and close");
-		
-		JPanel btnContainer = new JPanel();
-		btnContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
-				SwingUtilities.RIGHT, SwingUtilities.BOTTOM));
-		
-		saveBtn.addActionListener(evt -> {
-			caller.updateAlbumList(right.getAlbums());
-			closeOp.windowClosing(null);
-		});
-		
-		btnContainer.add(saveBtn);
-		add(btnContainer, BorderLayout.SOUTH);
-	}
-
-	private void initMidPanel() throws IOException {
+	private void initMainPanel() throws IOException {
 		left = new JSearchableAlbumList(new File(PropertyManager.get(Constants.PROPERTY_OPEN_LOCATION)));
 		right = new JSearchableAlbumList(caller.getAlbumPaths());
 		
@@ -113,6 +104,22 @@ public class AlbumManagerWindow extends JFrame {
 				right.remove(right.getSelectedItem());
 			}
 		});
+	}
+	
+	private void initBottomPanel() {
+		saveBtn = new JButton("Save and close");
+		
+		JPanel btnContainer = new JPanel();
+		btnContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
+				SwingUtilities.RIGHT, SwingUtilities.BOTTOM));
+		
+		saveBtn.addActionListener(evt -> {
+			caller.updateAlbumList(right.getAlbums());
+			closeOp.windowClosing(null);
+		});
+		
+		btnContainer.add(saveBtn);
+		add(btnContainer, BorderLayout.SOUTH);
 	}
 	
 }

@@ -13,6 +13,7 @@ import co.kukurin.xml.items.Playlist;
 
 /**
  * Utility methods for writing to XML files.
+ * 
  * @author Toni Kukurin
  *
  */
@@ -23,6 +24,13 @@ public class XMLPlaylistUtils {
 	 */
 	private XMLPlaylistUtils() {}
 	
+	/**
+	 * Creates a playlist using given parameters.
+	 * 
+	 * @param toCreate Playlist to be created (non-null).
+	 * @param result Resulting file (non-null).
+	 * @throws Exception I/O error.
+	 */
 	public static void createPlaylist(Playlist toCreate, File result) throws Exception {
 		Objects.requireNonNull(toCreate);
 		Objects.requireNonNull(result);
@@ -46,6 +54,13 @@ public class XMLPlaylistUtils {
 		Files.write(result.toPath(), tempBytes, StandardOpenOption.APPEND);
 	}
 	
+	/**
+	 * Loads a file from give location, parsing it as a {@link Playlist} item.
+	 * 
+	 * @param location Location which the file is to be loaded from
+	 * @return {@link Playlist} item.
+	 * @throws Exception I/O error.
+	 */
 	public static Playlist loadPlaylist(File location) throws Exception {
 		if(location == null || location.isDirectory() || !location.exists())
 			throw new IllegalArgumentException("Invalid playlist location given!");

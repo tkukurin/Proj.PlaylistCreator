@@ -1,0 +1,5 @@
+-- rijeseno ---- properties loading -- in case file nonexistent
+-- rijeseno ---- property file updating
+
+list selection
+drag drop

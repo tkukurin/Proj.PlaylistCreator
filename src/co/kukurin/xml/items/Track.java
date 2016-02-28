@@ -9,6 +9,14 @@ import org.simpleframework.xml.core.Commit;
 
 import co.kukurin.utils.Constants;
 
+/**
+ * (De)serializable class ready to be used as an XML object.
+ * <p>
+ * Represents a track within a playlist with its corresponding attributes and elements.
+ * 
+ * @author Toni Kukurin
+ *
+ */
 @Root
 public class Track {
 	
