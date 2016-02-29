@@ -1,4 +1,4 @@
-package co.kukurin.gui.model;
+package co.kukurin.gui.model.concrete;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import co.kukurin.gui.main.JPlaylistComponent;
+import co.kukurin.gui.model.UpdateableListModel;
 import co.kukurin.xml.items.Track;
 
 /**
@@ -36,7 +37,6 @@ public class PlaylistModel extends UpdateableListModel<Track> {
 	 */
 	public PlaylistModel(JPlaylistComponent caller) {
 		this.loadedAlbums = new LinkedHashMap<>();
-		this.items = new ArrayList<>();
 		
 		addListDataListener(caller);
 	}

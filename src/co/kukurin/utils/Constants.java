@@ -28,6 +28,8 @@ public class Constants {
 	public static final String PROGRAM_TITLE = "VLC Playlist creator";
 
 	// Properties
+	public static final String PROPERTY_SPLIT_STRING = ".";
+	public static final Character PROPERTY_SPLIT_CHAR = '.';
 	public static final String PROPERTY_SAVE_LOCATION = "save.location";
 	public static final String PROPERTY_OPEN_LOCATION = "open.location";
 	public static final String PROPERTY_MUSIC_LOCATION = "music.location";

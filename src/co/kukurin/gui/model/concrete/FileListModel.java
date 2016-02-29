@@ -1,9 +1,11 @@
-package co.kukurin.gui.model;
+package co.kukurin.gui.model.concrete;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import co.kukurin.gui.model.UpdateableListModel;
 
 /**
  * Basic {@link ListModel} containing a list of file items and offering basic add/remove options.

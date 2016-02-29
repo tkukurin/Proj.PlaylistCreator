@@ -110,6 +110,19 @@ public class PropertyManager {
 		return true;
 	}
 	
+	public static String makePropertyHumanReadable(String key) {
+		char[] chArray = key.toCharArray();
+		chArray[0] = Character.toUpperCase(chArray[0]);
+		
+		for(int i = 1; i < chArray.length; i++) {
+			if(chArray[i] == Constants.PROPERTY_SPLIT_CHAR) {
+				chArray[i] = ' ';
+			}
+		}
+		
+		return new String(chArray);
+	}
+	
 	public static String get(String key) {
 		if(properties == null)
 			return null;

@@ -1,6 +1,7 @@
 package co.kukurin.gui.albummanager;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -13,10 +14,14 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import co.kukurin.gui.actions.list.DeleteListItemOnDoubleClick;
+import co.kukurin.gui.actions.list.DeleteListItemsOnKeypress;
 import co.kukurin.gui.main.MainWindow;
+import co.kukurin.gui.model.concrete.FileListModel;
 import co.kukurin.utils.Constants;
 import co.kukurin.utils.PropertyManager;
 import co.kukurin.utils.layout.SwingUtils;
@@ -33,12 +38,18 @@ import co.kukurin.utils.layout.SwingUtils;
 @SuppressWarnings("serial")
 public class AlbumManagerWindow extends JFrame {
 	
+	private static final int DEFAULT_HEIGHT = 480;
+	private static final int DEFAULT_WIDTH = 640;
+	
+	private static final int MIN_WIDTH = 380;
+	private static final int MIN_HEIGHT = 380;
+
 	private static final String WINDOW_TITLE = "Playlist album manager";
 	
 	private final MainWindow caller;
 	
-	private JSearchableAlbumList left;
-	private JSearchableAlbumList right;
+	private JSearchableAlbumListComponent left;
+	private JSearchableAlbumListComponent right;
 	
 	private JButton saveBtn;
 	
@@ -59,19 +70,19 @@ public class AlbumManagerWindow extends JFrame {
 		this.caller = caller;
 
 		initGui();
-		SwingUtils.instanceDefaults(this, 640, 480);
+		SwingUtils.instanceDefaults(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
 		setLocationRelativeTo(caller);
-		addWindowListener(closeOp);
 		
-		if(!PropertyManager.hasValidProperties())
-			initWarningPanel();
-		
-		pack();
+		initListeners();
 		setTitle(WINDOW_TITLE);
 	}
 
 	private void initGui() throws IOException {
 		setLayout(new BorderLayout());
+		
+		if(PropertyManager.get(Constants.PROPERTY_MUSIC_LOCATION).isEmpty())
+			initWarningPanel();
 		
 		initMainPanel();
 		initBottomPanel();
@@ -84,10 +95,8 @@ public class AlbumManagerWindow extends JFrame {
 	}
 
 	private void initMainPanel() throws IOException {
-		left = new JSearchableAlbumList("Loaded from disk", new File(PropertyManager.get(Constants.PROPERTY_MUSIC_LOCATION)));
-		right = new JSearchableAlbumList("Currently in playlist", caller.getAlbumPaths());
-		
-		addLeftAndRightListeners();
+		left = new JSearchableAlbumListComponent("Loaded from disk", new File(PropertyManager.get(Constants.PROPERTY_MUSIC_LOCATION)));
+		right = new JSearchableAlbumListComponent("Currently in playlist", caller.getAlbumPaths());
 		
 		JPanel listContainer = new JPanel(new GridLayout(1, 2, 10, 0));
 		listContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
@@ -97,11 +106,37 @@ public class AlbumManagerWindow extends JFrame {
 		listContainer.add(right, BorderLayout.EAST);
 		add(listContainer, BorderLayout.CENTER);
 	}
+	
+	private void initBottomPanel() {
+		saveBtn = new JButton("Save and close");
+		
+		JPanel btnContainer = new JPanel(new BorderLayout());
+		btnContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
+				SwingUtilities.RIGHT, SwingUtilities.BOTTOM));
+		
+		saveBtn.addActionListener(evt -> {
+			caller.updateAlbumList(right.getFileListModel().getEntireFileset());
+			closeOp.windowClosing(null);
+		});
+		
+		btnContainer.add(saveBtn, BorderLayout.WEST);
+		add(btnContainer, BorderLayout.SOUTH);
+	}
+	
+	private void initListeners() {
+		addWindowListener(closeOp);
+		SwingUtils.simulateExitOnEscape(left, this);
+		SwingUtils.simulateExitOnEscape(right, this);
+		SwingUtils.simulateExitOnEscape(saveBtn, this);
+		
+		addLeftAndRightListeners();
+	}
 
 	private void addLeftAndRightListeners() {
 		left.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				right.getFileList().setSelectedIndex(-1);
 				if(e.getClickCount() != 2)
 					return;
 				
@@ -119,47 +154,23 @@ public class AlbumManagerWindow extends JFrame {
 			}
 		});
 		
-		right.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() != 2)
-					return;
-				
-				right.remove(right.getSelectedItem());
-			}
-		});
-		
-		right.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DELETE) {
-					right.remove(right.getSelectedItem());
-				}
-			}
-		});
+		right.addMouseListener(new DeleteListItemOnDoubleClick(right.getFileList(), right.getFileListModel()));
+		right.addKeyListener(new DeleteListItemsOnKeypress(right.getFileList(), right.getFileListModel()));
 	}
 	
 	private void copySelectedLeftToRight() {
-		File sel = left.getSelectedItem();
+		JList<File> leftList = left.getFileList();
+		FileListModel leftModel = left.getFileListModel();
 		
-		if(sel != null)
-			right.add(sel);
+		int [] selIdx = leftList.getSelectedIndices();
+		
+		for(int index : selIdx) {
+			if(index > leftModel.getSize())
+				continue;
+			
+			File curr = leftModel.getElementAt(index);
+			if(curr != null)
+				right.getFileListModel().add(curr);
+		}
 	}
-	
-	private void initBottomPanel() {
-		saveBtn = new JButton("Save and close");
-		
-		JPanel btnContainer = new JPanel();
-		btnContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
-				SwingUtilities.RIGHT, SwingUtilities.BOTTOM));
-		
-		saveBtn.addActionListener(evt -> {
-			caller.updateAlbumList(right.getAlbums());
-			closeOp.windowClosing(null);
-		});
-		
-		btnContainer.add(saveBtn);
-		add(btnContainer, BorderLayout.SOUTH);
-	}
-	
 }

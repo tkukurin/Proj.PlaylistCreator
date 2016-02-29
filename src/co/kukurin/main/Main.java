@@ -30,13 +30,11 @@ public class Main {
 			PropertyManager.createDefaultProperties();
 			JOptionPane.showMessageDialog(null, "No properties file found!");
 			
-			SwingUtilities.invokeLater(() -> new InputScreenWindow(Main.class));
-			synchronized(Main.class) {
-				Main.class.wait();
-			}
+			SwingUtilities.invokeLater(() -> new InputScreenWindow(true));
+			
+		} else {
+			SwingUtilities.invokeLater(() -> new MainWindow());
 		}
-		
-		SwingUtils.doStartup(MainWindow.class);
 	}
 
 }

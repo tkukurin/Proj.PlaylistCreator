@@ -1,9 +1,5 @@
 package co.kukurin.gui.main;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -22,7 +18,9 @@ import javax.swing.JList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
-import co.kukurin.gui.model.PlaylistModel;
+import co.kukurin.gui.actions.list.DeleteListItemOnDoubleClick;
+import co.kukurin.gui.actions.list.DeleteListItemsOnKeypress;
+import co.kukurin.gui.model.concrete.PlaylistModel;
 import co.kukurin.utils.Constants;
 import co.kukurin.utils.layout.SwingUtils;
 import co.kukurin.xml.XMLPlaylistUtils;
@@ -53,30 +51,8 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 		model = new PlaylistModel(this);
 		setModel(model);
 		
-		addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_DELETE) {
-					int[] selected = getSelectedIndices();
-					for(int i = selected.length - 1; i >= 0; i--)
-						model.remove(selected[i]);
-					
-					setSelectedIndex(-1);
-				}
-			}
-		});
-		
-		// TODO unsure if makes sense
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() != 2)
-					return;
-				
-				model.remove(getSelectedIndex());
-				setSelectedIndex(-1);
-			}
-		});
+		addKeyListener(new DeleteListItemsOnKeypress(this, model));
+		addMouseListener(new DeleteListItemOnDoubleClick(this, model));
 	}
 
 	/**
@@ -95,7 +71,6 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 			// because of the loop that's going on outside.
 			Thread t = new Thread(() -> {
 				try {
-					System.out.println(Thread.currentThread());
 					Files.walkFileTree(p.toPath(), new SimpleFileVisitor<Path>() {
 						@Override
 						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -161,19 +136,35 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 	 */
 	public void updateAlbums(Collection<File> albums) throws Exception {
 		Objects.requireNonNull(albums);
+		
+		// TODO
 		Iterator<File> it = model.getLoadedAlbums().keySet().iterator();
 		
 		while(it.hasNext()) {
 			File album = it.next();
+			boolean contains = false;
 			
-			if(!albums.contains(album)) {
+			for(File parameterAlbum : albums) {
+				if(parameterAlbum == album) {
+					// if it's exactly the same object, no changes were made
+					
+					albums.remove(parameterAlbum);
+					contains = true;
+					break;
+				} else if(album.equals(parameterAlbum)) {
+					// otherwise, we need to update as the user has probably removed the
+					// album from the playlist and then added it again.
+					break;
+				}
+			}
+			
+			if(!contains) {
 				model.remove(album, false);
 				it.remove();
-			} else {
-				albums.remove(album);
 			}
 		}
 		
+		resetPlaylist();
 		addAlbums(albums);
 	}
 	
@@ -216,6 +207,8 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 		String filename = path.getFileName().toString();
 		Playlist toCreate = new Playlist(filename, model.getItems());
 		XMLPlaylistUtils.createPlaylist(toCreate, path.toFile());
+		
+		hasBeenModified = false;
 	}
 
 	/**

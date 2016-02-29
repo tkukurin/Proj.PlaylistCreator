@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import co.kukurin.gui.actions.DefaultMenuAction;
@@ -63,10 +64,24 @@ public class MainMenuFactory {
 		activeMenu = file;
 		
 		createAndAdd("New", "ctrl N", e -> {
+			int save = caller.queryFileSaveIfNecessary();
+			
+			if(save == JOptionPane.YES_OPTION)
+				displaySaveFileDialog(caller);
+			else if(save == JOptionPane.CANCEL_OPTION)
+				return;
+			
 			caller.newPlaylist();
 		});
 		
 		createAndAdd("Open", "ctrl O", e -> {
+			int save = caller.queryFileSaveIfNecessary();
+			
+			if(save == JOptionPane.YES_OPTION)
+				displaySaveFileDialog(caller);
+			else if(save == JOptionPane.CANCEL_OPTION)
+				return;
+			
 			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_OPEN_LOCATION));
 			int result = chooser.showOpenDialog(caller);
 			
@@ -78,17 +93,44 @@ public class MainMenuFactory {
 		});
 		
 		createAndAdd("Save", "ctrl S", e -> {
-			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION));
-			int result = chooser.showSaveDialog(caller);
+			File curr = caller.getCurrentOpenFileLocation();
 			
-			if(result != JFileChooser.APPROVE_OPTION)
-				return;
-			
-			File selected = chooser.getSelectedFile();
-			caller.storeCurrentPlaylist(selected);
+			if(curr == null)
+				displaySaveFileDialog(caller);
+			else
+				caller.storeCurrentPlaylist(curr);
+		});
+		
+		createAndAdd("Save as", "ctrl alt S", e -> {
+			displaySaveFileDialog(caller);
 		});
 		
 		return file;
+	}
+
+	public static void displaySaveFileDialog(MainWindow caller) {
+		String saveLoc = PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION);
+		File openLoc = caller.getCurrentOpenFileLocation();
+		
+		if(openLoc != null)
+			saveLoc = openLoc.getAbsolutePath();
+		
+		JFileChooser chooser = new JFileChooser(saveLoc);
+		int result = chooser.showSaveDialog(caller);
+		
+		if(result != JFileChooser.APPROVE_OPTION)
+			return;
+		
+		File selected = chooser.getSelectedFile();
+		if(selected.exists()) {
+			int result2 = JOptionPane.showConfirmDialog(caller, "File already exists; overwrite?",
+					"File exists", JOptionPane.YES_NO_OPTION);
+
+			if(result2 == JOptionPane.NO_OPTION)
+				displaySaveFileDialog(caller);
+		}
+			
+		caller.storeCurrentPlaylist(selected);
 	}
 	
 	/**
@@ -105,6 +147,11 @@ public class MainMenuFactory {
 		
 		// TODO ?
 //		createAndAdd("Group by folder", "ctrl alt G", e-> {
+//
+//		});
+		
+		// TODO ?
+//		createAndAdd("Fix invalid file locations", "", e -> {
 //
 //		});
 		

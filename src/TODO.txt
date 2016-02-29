@@ -1,5 +1,6 @@
-treba: main screen up/down strelicama
 update if file is missing
+--- rijeseno --- add + remove album solve
+-> bi li trebalo omogućiti učitavanje više istih instanci albuma?
 
 -- rijeseno ---- properties loading -- in case file nonexistent
 -- rijeseno ---- property file updating

@@ -3,8 +3,11 @@ package co.kukurin.utils.layout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -13,7 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
@@ -43,27 +45,13 @@ public class SwingUtils {
 		try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
 		catch (Exception ignore) {}
 	}
-	
-	/**
-	 * Frame startup.
-	 * 
-	 * @param c Class being instantiated
-	 */
-	public static void doStartup(Class<? extends JFrame> c) {
-		SwingUtilities.invokeLater(() -> {
-			try {
-				c.newInstance();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
-	}
 
 	/**
 	 * Instances frame basics
 	 * @param mainView Frame which has been created.
 	 */
 	public static void instanceDefaults(JFrame mainView) {
+		mainView.setLocationRelativeTo(null);
 		mainView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		mainView.pack();
 		mainView.setVisible(true);
@@ -164,8 +152,14 @@ public class SwingUtils {
 		context.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					window.dispose();
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					for(WindowListener wl : window.getWindowListeners()) {
+						wl.windowClosing(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
+					}
+					
+					if(window != null)
+						window.dispose();
+				}
 			}
 		});
 	}
@@ -186,6 +180,42 @@ public class SwingUtils {
 		
 		p.add(l);
 		return p;
+	}
+	
+	/**
+	 * Tries to derive a default header font from given context.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static Font deriveHeader1(Component context) {
+		return context.getFont().deriveFont(Font.PLAIN, 16);
+	}
+	
+	/**
+	 * Set {@link #deriveHeader1(Component)} font on component.
+	 * @param context
+	 */
+	public static void setHeader1(Component context) {
+		context.setFont(deriveHeader1(context));
+	}
+	
+	/**
+	 * Tries to derive a default header font from given context.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static Font deriveHeader2(Component context) {
+		return context.getFont().deriveFont(Font.BOLD, 12);
+	}
+	
+	/**
+	 * Set {@link #deriveHeader2(Component)} font on component.
+	 * @param context
+	 */
+	public static void setHeader2(Component context) {
+		context.setFont(deriveHeader2(context));
 	}
 
 }

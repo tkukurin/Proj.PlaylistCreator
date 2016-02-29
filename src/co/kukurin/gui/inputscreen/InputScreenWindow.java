@@ -1,8 +1,6 @@
 package co.kukurin.gui.inputscreen;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,8 +11,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import co.kukurin.gui.actions.DefaultMenuAction;
+import co.kukurin.gui.main.MainWindow;
 import co.kukurin.utils.PropertyManager;
 import co.kukurin.utils.layout.GroupLayoutCreator;
 import co.kukurin.utils.layout.SwingUtils;
@@ -33,27 +33,7 @@ public class InputScreenWindow extends JFrame {
 	
 	private static final String WINDOW_TITLE = "Set properties";
 	
-	// synchronized
-	
-	/**
-	 * This object may be null; in case it isn't, the object provided here must be
-	 * notified using Java's default {@link Object#notify()} method after this
-	 * window is disposed.
-	 */
-	private Object notifyUponCompletion;
-	
-	/**
-	 * Crude and simple way of handling intial call to the properties window.
-	 * <p>
-	 * In case window is closed by pressing the confirm button, this listener will be removed; otherwise,
-	 * the listener will be called and will exit the program altogether.
-	 */
-	private WindowAdapter syncDisposeListener = new WindowAdapter() {
-		@Override
-		public void windowClosed(WindowEvent e) { System.exit(0); }
-	};
-	
-	// end synchronized
+	private boolean invokeMainOnClose;
 	
 	private List<String> keys;
 	private List<JTextField> inputFields;
@@ -78,13 +58,11 @@ public class InputScreenWindow extends JFrame {
 	 * 
 	 * @param syncObject Object on which the synchronization takes place.
 	 */
-	public InputScreenWindow(Object syncObject) {
+	public InputScreenWindow(boolean invokeMainOnClose) {
 		this();
 		
-		this.notifyUponCompletion = syncObject;
 		setLocationRelativeTo(null);
-		
-		addWindowListener(syncDisposeListener);
+		this.invokeMainOnClose = invokeMainOnClose;
 	}
 
 	/**
@@ -99,16 +77,16 @@ public class InputScreenWindow extends JFrame {
 		
 		JButton confirmBtn = getConfirmBtn();
 		addObjectsFromPropertyValues(keys, values, glc, confirmBtn);
+
 		glc.addHorizontally(new JPanel(), confirmBtn);
-		
 		glc.doLayout();
 	}
 
-	private void addObjectsFromPropertyValues(Enumeration<Object> keys, Iterator<Object> values, GroupLayoutCreator glc,
-			JButton confirmBtn) {
+	private void addObjectsFromPropertyValues(Enumeration<Object> keys, Iterator<Object> values,
+			GroupLayoutCreator glc, JButton confirmBtn) {
 		while(keys.hasMoreElements()) {
 			String currKey = keys.nextElement().toString();
-			JLabel currKeyLabel = new JLabel(makePropertyHumanReadable(currKey));
+			JLabel currKeyLabel = new JLabel(PropertyManager.makePropertyHumanReadable(currKey));
 			this.keys.add(currKey);
 			
 			String currValue = values.hasNext() ? values.next().toString() : "";
@@ -121,19 +99,6 @@ public class InputScreenWindow extends JFrame {
 			glc.addHorizontally(currKeyLabel, currValueField);
 		}
 	}
-	
-	private String makePropertyHumanReadable(String key) {
-		char[] chArray = key.toCharArray();
-		chArray[0] = Character.toUpperCase(chArray[0]);
-		
-		for(int i = 1; i < chArray.length; i++) {
-			if(chArray[i] == '.') {
-				chArray[i] = ' ';
-			}
-		}
-		
-		return new String(chArray);
-	}
 
 	private JButton getConfirmBtn() {
 		return new JButton(new DefaultMenuAction("Confirm", "") {
@@ -145,14 +110,10 @@ public class InputScreenWindow extends JFrame {
 				});
 				
 				PropertyManager.store(InputScreenWindow.this);
-				InputScreenWindow.this.removeWindowListener(syncDisposeListener);
 				InputScreenWindow.this.dispose();
 				
-				if(notifyUponCompletion != null) {
-					synchronized(notifyUponCompletion) {
-						notifyUponCompletion.notify();
-					}
-				}
+				if(invokeMainOnClose)
+					SwingUtilities.invokeLater(() -> new MainWindow());
 			}
 		});
 	}
