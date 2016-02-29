@@ -35,7 +35,7 @@ public class AlbumManagerWindow extends JFrame {
 	
 	private static final String WINDOW_TITLE = "Playlist album manager";
 	
-	private MainWindow caller;
+	private final MainWindow caller;
 	
 	private JSearchableAlbumList left;
 	private JSearchableAlbumList right;
@@ -55,7 +55,7 @@ public class AlbumManagerWindow extends JFrame {
 		}
 	};
 	
-	public AlbumManagerWindow(MainWindow caller) throws IOException {
+	public AlbumManagerWindow(final MainWindow caller) throws IOException {
 		this.caller = caller;
 
 		initGui();

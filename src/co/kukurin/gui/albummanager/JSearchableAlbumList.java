@@ -37,6 +37,13 @@ public class JSearchableAlbumList extends JPanel {
 	private JTextField searchField;
 	private JList<File> fileList;
 	
+	/**
+	 * Creates the default searchable album list instance, along with given title.
+	 * <p>
+	 * In case the title is null or empty, no title will be displayed.
+	 * 
+	 * @param title
+	 */
 	public JSearchableAlbumList(String title) {
 		if(title != null && !title.isEmpty())
 			titleLabel = new JLabel(title);
@@ -53,10 +60,6 @@ public class JSearchableAlbumList extends JPanel {
 		
 		initSearchField();
 		initGui();
-	}
-	
-	public JSearchableAlbumList() {
-		this("");
 	}
 	
 	public JSearchableAlbumList(String title, Collection<File> files) {

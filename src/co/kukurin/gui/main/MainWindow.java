@@ -1,6 +1,8 @@
 package co.kukurin.gui.main;
 
 import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -24,15 +26,25 @@ import co.kukurin.utils.layout.SwingUtils;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 	
+	private static final int WIDTH = 640;
+	private static final int HEIGHT = 480;
+	
 	private JPlaylistComponent playlist;
 	
 	public MainWindow() {
-		setJMenuBar(MainMenu.init(this));
+		setJMenuBar(MainMenuFactory.init(this));
 		setTitle(Constants.PROGRAM_TITLE);
 		
 		initGui();
-		SwingUtils.instanceDefaults(this, 640, 480);
+		SwingUtils.instanceDefaults(this, WIDTH, HEIGHT);
 		setLocationRelativeTo(null);
+		
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				playlist.requestFocus();
+			}
+		});
 	}
 
 	private void initGui() {
@@ -85,7 +97,12 @@ public class MainWindow extends JFrame {
 		}
 	}
 
+	/**
+	 * Displays an {@link AlbumManagerWindow}, making this window temporarily disabled.
+	 */
 	public void displayAlbumManager() {
+		this.setEnabled(false);
+		
 		SwingUtilities.invokeLater(() -> {
 			try {
 				new AlbumManagerWindow(this);

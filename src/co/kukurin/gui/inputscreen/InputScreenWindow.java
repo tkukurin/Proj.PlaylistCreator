@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import co.kukurin.gui.main.MainMenu;
+import co.kukurin.gui.actions.DefaultMenuAction;
 import co.kukurin.utils.PropertyManager;
 import co.kukurin.utils.layout.GroupLayoutCreator;
 import co.kukurin.utils.layout.SwingUtils;
@@ -33,6 +33,8 @@ public class InputScreenWindow extends JFrame {
 	
 	private static final String WINDOW_TITLE = "Set properties";
 	
+	// synchronized
+	
 	/**
 	 * This object may be null; in case it isn't, the object provided here must be
 	 * notified using Java's default {@link Object#notify()} method after this
@@ -48,11 +50,10 @@ public class InputScreenWindow extends JFrame {
 	 */
 	private WindowAdapter syncDisposeListener = new WindowAdapter() {
 		@Override
-		public void windowClosed(WindowEvent e) {
-			// crude, but easy way out.
-			System.exit(0);
-		}
+		public void windowClosed(WindowEvent e) { System.exit(0); }
 	};
+	
+	// end synchronized
 	
 	private List<String> keys;
 	private List<JTextField> inputFields;
@@ -97,10 +98,17 @@ public class InputScreenWindow extends JFrame {
 		glc.setLinkColumn(0);
 		
 		JButton confirmBtn = getConfirmBtn();
+		addObjectsFromPropertyValues(keys, values, glc, confirmBtn);
+		glc.addHorizontally(new JPanel(), confirmBtn);
 		
+		glc.doLayout();
+	}
+
+	private void addObjectsFromPropertyValues(Enumeration<Object> keys, Iterator<Object> values, GroupLayoutCreator glc,
+			JButton confirmBtn) {
 		while(keys.hasMoreElements()) {
 			String currKey = keys.nextElement().toString();
-			JLabel currKeyLabel = new JLabel(currKey);
+			JLabel currKeyLabel = new JLabel(makePropertyHumanReadable(currKey));
 			this.keys.add(currKey);
 			
 			String currValue = values.hasNext() ? values.next().toString() : "";
@@ -112,13 +120,23 @@ public class InputScreenWindow extends JFrame {
 			
 			glc.addHorizontally(currKeyLabel, currValueField);
 		}
+	}
+	
+	private String makePropertyHumanReadable(String key) {
+		char[] chArray = key.toCharArray();
+		chArray[0] = Character.toUpperCase(chArray[0]);
 		
-		glc.addHorizontally(new JPanel(), confirmBtn);
-		glc.doLayout();
+		for(int i = 1; i < chArray.length; i++) {
+			if(chArray[i] == '.') {
+				chArray[i] = ' ';
+			}
+		}
+		
+		return new String(chArray);
 	}
 
 	private JButton getConfirmBtn() {
-		return new JButton(new MainMenu.DefaultMenuAction("Confirm", "") {
+		return new JButton(new DefaultMenuAction("Confirm", "") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Iterator<JTextField> iter = InputScreenWindow.this.inputFields.iterator();

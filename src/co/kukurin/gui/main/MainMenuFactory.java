@@ -2,42 +2,25 @@ package co.kukurin.gui.main;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Objects;
 
-import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
+import co.kukurin.gui.actions.DefaultMenuAction;
 import co.kukurin.gui.inputscreen.InputScreenWindow;
 import co.kukurin.utils.Constants;
 import co.kukurin.utils.PropertyManager;
 
 @SuppressWarnings("serial")
-public class MainMenu {
+public class MainMenuFactory {
 	
 	/**
 	 * Static non-instantiable class
 	 */
-	private MainMenu() {}
-	
-	/**
-	 * Helper class which automatically defines a shortcut key and name for given action object.
-	 * @author Toni Kukurin
-	 *
-	 */
-	public static abstract class DefaultMenuAction extends AbstractAction {
-		public DefaultMenuAction(String name, String key) {
-			Objects.requireNonNull(name, "name must be a valid string!");
-			Objects.requireNonNull(key, "a key combination must be provded");
-			
-			putValue(NAME, name);
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(key));
-		}
-	}
+	private MainMenuFactory() {}
 	
 	/**
 	 * Helper functional interface for cleaner code.
