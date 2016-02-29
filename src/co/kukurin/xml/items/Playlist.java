@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.NamespaceList;
 import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Version;
 
 /**
  * (De)serializable class ready to be used as an XML object.
@@ -19,12 +19,12 @@ import org.simpleframework.xml.Version;
  * @author Toni Kukurin
  *
  */
-@Root
+@Root(strict=false)
 @NamespaceList({
 	@Namespace(reference="http://xspf.org/ns/0/"),
 	@Namespace(reference="http://www.videolan.org/vlc/playlist/ns/0/", prefix="vlc")
 })
-@Version(revision=1.0)
+// @Version(revision=1, required=false)
 public class Playlist {
 	
 	@Element
@@ -32,6 +32,9 @@ public class Playlist {
 	
 	@ElementList(name="trackList", entry="track")
 	private List<Track> tracklist;
+	
+	@Attribute
+	private static int version;
 	
 	/**
 	 * Necessary for serialization, otherwise shouldn't be used as

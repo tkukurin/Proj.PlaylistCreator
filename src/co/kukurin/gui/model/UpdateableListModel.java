@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.SwingUtilities;
 
 /**
  * A list model which offers the default Collection add/remove methods with corresponding listener invocations.
@@ -42,7 +43,7 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 		boolean result = this.items.addAll(items);
 		
 		if(result)
-			fireIntervalAdded(this, oldsiz, this.items.size() - 1);
+			SwingUtilities.invokeLater(() -> fireIntervalAdded(this, oldsiz, this.items.size() - 1));
 		
 		addCallback();
 		return result;
@@ -58,7 +59,7 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 		boolean val = items.add(item);
 		
 		if(val)
-			fireIntervalAdded(this, items.size() - 1, items.size() - 1);
+			SwingUtilities.invokeLater(() -> fireIntervalAdded(this, items.size() - 1, items.size() - 1));
 		
 		addCallback();
 		return val;
@@ -74,12 +75,13 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 		boolean result = this.items.removeAll(items);
 		
 		if(result) {
-			int endIndex = this.items.size() - 1;
+			int endIndexModified = this.items.size() - 1;
 			
-			if(endIndex < 0)
-				endIndex = 0;
+			if(endIndexModified < 0)
+				endIndexModified = 0;
 			
-			fireContentsChanged(this, 0, endIndex);
+			final int endIndex = endIndexModified;
+			SwingUtilities.invokeLater(() -> fireContentsChanged(this, 0, endIndex));
 		}
 		
 		removeCallback();
@@ -111,7 +113,7 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 	 */
 	public E remove(int i) {
 		E val = items.remove(i);
-		fireIntervalRemoved(this, i, i);
+		SwingUtilities.invokeLater(() -> fireIntervalRemoved(this, i, i));
 		removeCallback();
 		
 		return val;
@@ -123,9 +125,7 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 	 * Does nothing by default, its purpose is to be overridden if necessary to provide internal callbacks
 	 * after each content change.
 	 */
-	protected void removeCallback() {
-		
-	}
+	protected void removeCallback() {}
 	
 	/**
 	 * Method called after a given add/addAll invocation.
@@ -133,8 +133,6 @@ public class UpdateableListModel<E> extends AbstractListModel<E> {
 	 * Does nothing by default, its purpose is to be overridden if necessary to provide internal callbacks
 	 * after each content change.
 	 */
-	protected void addCallback() {
-		
-	}
+	protected void addCallback() {}
 
 }

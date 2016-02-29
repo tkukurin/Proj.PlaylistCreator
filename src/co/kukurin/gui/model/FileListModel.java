@@ -16,30 +16,20 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class FileListModel extends UpdateableListModel<File> {
 	
-	private List<File> activeFiles;
+	private List<File> entireFileset;
 	private String lastFilter;
 	
 	public FileListModel() {
-		this.activeFiles = this.items;
+		this.entireFileset = this.items;
 		lastFilter = null;
-	}
-
-	@Override
-	public int getSize() {
-		return activeFiles.size();
-	}
-
-	@Override
-	public File getElementAt(int index) {
-		return activeFiles.get(index);
 	}
 	
 	public List<File> getActiveFileset() {
-		return activeFiles;
+		return items;
 	}
 	
 	public Collection<File> getEntireFileset() {
-		return items;
+		return entireFileset;
 	}
 	
 	@Override
@@ -62,13 +52,13 @@ public class FileListModel extends UpdateableListModel<File> {
 	 */
 	public void updateActiveSet(String s) {
 		if(s == null || s.isEmpty()) {
-			this.activeFiles = items;
+			this.items = this.entireFileset;
 		} else {
 			s = s.toLowerCase();
 			final String[] tokens = s.split("\\s+");
 			
-			this.activeFiles = new ArrayList<>();
-			items.forEach(file -> {
+			this.items = new ArrayList<>();
+			entireFileset.forEach(file -> {
 				boolean matching = true;
 				String lowercaseFilename = file.toString().toLowerCase();
 				
@@ -80,12 +70,12 @@ public class FileListModel extends UpdateableListModel<File> {
 				}
 				
 				if(matching)
-					activeFiles.add(file);
+					items.add(file);
 			});
 		}
 		
 		lastFilter = s;
-		fireContentsChanged(this, 0, activeFiles.size() - 1);
+		fireContentsChanged(this, 0, entireFileset.size() - 1);
 	}
 
 }

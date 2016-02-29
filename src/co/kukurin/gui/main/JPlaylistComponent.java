@@ -2,6 +2,8 @@ package co.kukurin.gui.main;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -17,11 +19,11 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.swing.JList;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import co.kukurin.gui.model.PlaylistModel;
+import co.kukurin.utils.Constants;
 import co.kukurin.utils.layout.SwingUtils;
 import co.kukurin.xml.XMLPlaylistUtils;
 import co.kukurin.xml.items.Playlist;
@@ -63,6 +65,18 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 				}
 			}
 		});
+		
+		// TODO unsure if makes sense
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() != 2)
+					return;
+				
+				model.remove(getSelectedIndex());
+				setSelectedIndex(-1);
+			}
+		});
 	}
 
 	/**
@@ -76,12 +90,28 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 		for(File p : paths) {
 			List<Track> tracklistToAdd = new ArrayList<>();
 			
+			// TODO thread creation might be necessary depending on the size of the
+			// subdirectories but probably the best solution would be to remove it here
+			// because of the loop that's going on outside.
 			Thread t = new Thread(() -> {
 				try {
+					System.out.println(Thread.currentThread());
 					Files.walkFileTree(p.toPath(), new SimpleFileVisitor<Path>() {
 						@Override
 						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-							tracklistToAdd.add(new Track(file.toFile()));
+							boolean hasValidMusicExtension = false;
+							String filename = file.getFileName().toString();
+							
+							for(String extension : Constants.audioSuffixes) {
+								if(filename.endsWith(extension)) {
+									hasValidMusicExtension = true;
+									break;
+								}
+							}
+							
+							if(hasValidMusicExtension)
+								tracklistToAdd.add(new Track(file.toFile()));
+							
 							return FileVisitResult.CONTINUE;
 						}
 					});
@@ -90,9 +120,11 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 					throw new RuntimeException(e);
 				}
 			});
-			t.start();
 			
-			SwingUtilities.invokeLater(() -> model.put(p, tracklistToAdd) );
+			t.start();
+			t.join();
+			
+			model.put(p,  tracklistToAdd);
 		}
 	}
 	
@@ -153,7 +185,7 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 	}
 	
 	/**
-	 * Removes the currenlty selected track from model.
+	 * Removes the currently selected track from model.
 	 */
 	public void removeCurrentlySelectedTrack() {
 		int idx = this.getSelectedIndex();

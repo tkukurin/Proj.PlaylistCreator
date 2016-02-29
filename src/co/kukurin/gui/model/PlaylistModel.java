@@ -74,6 +74,9 @@ public class PlaylistModel extends UpdateableListModel<Track> {
 		this.loadedAlbums = new LinkedHashMap<>();
 		this.items = new ArrayList<>();
 		
+		if(tracksiz <= 0)
+			tracksiz = 1;
+		
 		fireIntervalRemoved(this, 0, tracksiz - 1);
 	}
 	

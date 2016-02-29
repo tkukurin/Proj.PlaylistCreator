@@ -3,6 +3,7 @@ package co.kukurin.gui.albummanager;
 import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
@@ -29,35 +30,55 @@ import co.kukurin.utils.layout.GroupLayoutCreator;
 public class JSearchableAlbumList extends JPanel {
 
 	private static final String TOOLTIP_TEXT = "Empty string will display all entries";
-	private static final String SEARCH_IN_LIST = "Type query to search:";
+	private static final String SEARCH_IN_LIST = "Search:";
 	
-	private JLabel label;
+	private JLabel titleLabel;
+	private JLabel searchLabel;
 	private JTextField searchField;
 	private JList<File> fileList;
 	
-	public JSearchableAlbumList() {
-		fileList = new JList<>(new FileListModel());
-		searchField = new JTextField();
-		label = new JLabel(SEARCH_IN_LIST);
+	public JSearchableAlbumList(String title) {
+		if(title != null && !title.isEmpty())
+			titleLabel = new JLabel(title);
+		else
+			titleLabel = null;
 		
-		label.setLabelFor(searchField);
+		fileList = new JList<>(new FileListModel());
+		fileList.setFocusable(false);
+		
+		searchField = new JTextField();
+		searchLabel = new JLabel(SEARCH_IN_LIST);
+		
+		searchLabel.setLabelFor(searchField);
 		
 		initSearchField();
 		initGui();
 	}
 	
-	public JSearchableAlbumList(Collection<File> files) {
-		this();
+	public JSearchableAlbumList() {
+		this("");
+	}
+	
+	public JSearchableAlbumList(String title, Collection<File> files) {
+		this(title);
 		
 		Objects.requireNonNull(files);
 		((FileListModel)fileList.getModel()).addAll(files);
 	}
-
-	public JSearchableAlbumList(File p) throws IOException {
-		this();
-		
+	
+	public JSearchableAlbumList(Collection<File> files) {
+		this("", files);
+	}
+	
+	public JSearchableAlbumList(String title, File p) throws IOException {
+		this(title);
+	
 		Objects.requireNonNull(p);
 		traversePathAndAdd(p);
+	}
+
+	public JSearchableAlbumList(File p) throws IOException {
+		this("", p);
 	}
 	
 	private void initSearchField() {
@@ -66,14 +87,40 @@ public class JSearchableAlbumList extends JPanel {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				((FileListModel)fileList.getModel()).updateActiveSet(searchField.getText());
+				
+				int selIdx = fileList.getSelectedIndex();
+				int listSize = fileList.getModel().getSize();
+				
+				if(selIdx >= listSize)
+					selIdx = -1;
+				
+				if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+					if(selIdx >= listSize - 1)
+						selIdx = -1;
+					
+					selIdx++;
+					fileList.setSelectedIndex(selIdx);
+				} else if(e.getKeyCode() == KeyEvent.VK_UP) {
+					if(selIdx <= 0)
+						selIdx = listSize;
+						
+					selIdx--;
+					fileList.setSelectedIndex(selIdx);
+				}
+				
+				fileList.ensureIndexIsVisible(selIdx);
 			}
 		});
 	}
 
 	private void initGui() {
 		GroupLayoutCreator glc = new GroupLayoutCreator(this, true);
-		glc.addHorizontally(label);
-		glc.addHorizontally(searchField);
+		
+		if(titleLabel != null)
+			glc.addHorizontally(titleLabel);
+		
+		glc.addHorizontally(searchLabel, searchField);
+		// glc.addHorizontally(searchField);
 		
 		JScrollPane fileListContainer = new JScrollPane(fileList);
 		fileListContainer.setPreferredSize(new Dimension(300, 500));
@@ -104,6 +151,10 @@ public class JSearchableAlbumList extends JPanel {
 	}
 	
 	public File getSelectedItem() {
+		if(fileList.getSelectedIndex() >= fileList.getModel().getSize()
+				|| fileList.getSelectedIndex() < 0)
+			return null;
+		
 		return fileList.getSelectedValue();
 	}
 
@@ -118,6 +169,12 @@ public class JSearchableAlbumList extends JPanel {
 	@Override
 	public synchronized void addMouseListener(MouseListener l) {
 		fileList.addMouseListener(l);
+	}
+	
+	@Override
+	public synchronized void addKeyListener(KeyListener l) {
+		super.addKeyListener(l);
+		searchField.addKeyListener(l);
 	}
 
 	public Collection<File> getAlbums() {

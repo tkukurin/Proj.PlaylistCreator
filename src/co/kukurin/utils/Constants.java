@@ -1,6 +1,7 @@
 package co.kukurin.utils;
 
-import java.awt.Font;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Static class used for general-purpose constants
@@ -25,10 +26,12 @@ public class Constants {
 	// App constants
 	public static final String PROPERTY_LOCATION = "./properties/defaults.properties";
 	public static final String PROGRAM_TITLE = "VLC Playlist creator";
-	public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 12);
 
 	// Properties
 	public static final String PROPERTY_SAVE_LOCATION = "save.location";
 	public static final String PROPERTY_OPEN_LOCATION = "open.location";
-
+	public static final String PROPERTY_MUSIC_LOCATION = "music.location";
+	
+	// General
+	public static final List<String> audioSuffixes = Arrays.asList(".mp3", ".wav", ".flac", ".avi");
 }

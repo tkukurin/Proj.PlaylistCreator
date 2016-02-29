@@ -84,7 +84,7 @@ public class MainMenu {
 		});
 		
 		createAndAdd("Open", "ctrl O", e -> {
-			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_SAVE_LOCATION));
+			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_OPEN_LOCATION));
 			int result = chooser.showOpenDialog(caller);
 			
 			if(result != JFileChooser.APPROVE_OPTION)

@@ -44,6 +44,7 @@ public class PropertyManager {
 		properties = new Properties();
 		properties.put(Constants.PROPERTY_OPEN_LOCATION, "");
 		properties.put(Constants.PROPERTY_SAVE_LOCATION, "");
+		properties.put(Constants.PROPERTY_MUSIC_LOCATION, "");
 	}
 	
 	/**
@@ -98,7 +99,15 @@ public class PropertyManager {
 	}
 	
 	public static boolean hasValidProperties() {
-		return properties != null;
+		if(properties == null)
+			return false;
+		
+		for(Object val : getValues()) {
+			if(val == null || val.toString().isEmpty())
+				return false;
+		}
+		
+		return true;
 	}
 	
 	public static String get(String key) {

@@ -17,7 +17,7 @@ import co.kukurin.utils.Constants;
  * @author Toni Kukurin
  *
  */
-@Root
+@Root(strict=false)
 public class Track {
 	
 	private File file;
@@ -25,7 +25,7 @@ public class Track {
 	@Element
 	private String location;
 	
-	@Element
+	@Element(required=false)
 	private String title;
 	
 	/**
@@ -102,7 +102,10 @@ public class Track {
 	
 	@Override
 	public String toString() {
-		return title;
+		if(title != null && !title.isEmpty())
+			return title;
+		else
+			return file.getName();
 	}
 	
 }

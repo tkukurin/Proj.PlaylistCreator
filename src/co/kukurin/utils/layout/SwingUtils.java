@@ -1,10 +1,16 @@
 package co.kukurin.utils.layout;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -128,6 +134,58 @@ public class SwingUtils {
 	 */
 	public static void startupThread(Runnable r) {
 		new Thread(r).start();
+	}
+	
+	/**
+	 * Attaches a key event listener to given component, simulating a button click upon
+	 * pressing enter within the context.
+	 * 
+	 * @param context
+	 * @param button
+	 */
+	public static void simulateClickOnEnter(Component context, JButton button) {
+		context.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER)
+					button.doClick();
+			}
+		});
+	}
+	
+	/**
+	 * Attaches a key event listener to given component, disposing of the given window
+	 * upon pressing escape within the context.
+	 * 
+	 * @param context
+	 * @param button
+	 */
+	public static void simulateExitOnEscape(Component context, JFrame window) {
+		context.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					window.dispose();
+			}
+		});
+	}
+	
+	/**
+	 * Returns a "warning"-colored panel with given message.
+	 * 
+	 * @param context
+	 * @param message
+	 * @return
+	 */
+	public static JPanel constructWarningPanel(String message) {
+		JPanel p = new JPanel();
+		JLabel l = new JLabel(message);
+		
+		// "magical" color
+		p.setBackground(new Color(240, 40, 70));
+		
+		p.add(l);
+		return p;
 	}
 
 }

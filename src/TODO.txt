@@ -1,3 +1,6 @@
+treba: main screen up/down strelicama
+update if file is missing
+
 -- rijeseno ---- properties loading -- in case file nonexistent
 -- rijeseno ---- property file updating
 

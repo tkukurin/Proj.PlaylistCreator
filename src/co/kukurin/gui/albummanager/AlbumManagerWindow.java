@@ -2,6 +2,8 @@ package co.kukurin.gui.albummanager;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -31,6 +33,8 @@ import co.kukurin.utils.layout.SwingUtils;
 @SuppressWarnings("serial")
 public class AlbumManagerWindow extends JFrame {
 	
+	private static final String WINDOW_TITLE = "Playlist album manager";
+	
 	private MainWindow caller;
 	
 	private JSearchableAlbumList left;
@@ -55,11 +59,15 @@ public class AlbumManagerWindow extends JFrame {
 		this.caller = caller;
 
 		initGui();
-		SwingUtils.instanceDefaults(this);
+		SwingUtils.instanceDefaults(this, 640, 480);
 		setLocationRelativeTo(caller);
 		addWindowListener(closeOp);
 		
+		if(!PropertyManager.hasValidProperties())
+			initWarningPanel();
+		
 		pack();
+		setTitle(WINDOW_TITLE);
 	}
 
 	private void initGui() throws IOException {
@@ -69,11 +77,17 @@ public class AlbumManagerWindow extends JFrame {
 		initBottomPanel();
 	}
 
+	private void initWarningPanel() {
+		JPanel warning = SwingUtils.constructWarningPanel("NOTE: Properties have not been set, and the "
+				+ "program may be looking for your music collection in the wrong folder.");
+		add(warning, BorderLayout.NORTH);
+	}
+
 	private void initMainPanel() throws IOException {
-		left = new JSearchableAlbumList(new File(PropertyManager.get(Constants.PROPERTY_OPEN_LOCATION)));
-		right = new JSearchableAlbumList(caller.getAlbumPaths());
+		left = new JSearchableAlbumList("Loaded from disk", new File(PropertyManager.get(Constants.PROPERTY_MUSIC_LOCATION)));
+		right = new JSearchableAlbumList("Currently in playlist", caller.getAlbumPaths());
 		
-		addListMouseListeners();
+		addLeftAndRightListeners();
 		
 		JPanel listContainer = new JPanel(new GridLayout(1, 2, 10, 0));
 		listContainer.setBorder(SwingUtils.defaultMargin(SwingUtilities.LEFT,
@@ -84,14 +98,24 @@ public class AlbumManagerWindow extends JFrame {
 		add(listContainer, BorderLayout.CENTER);
 	}
 
-	private void addListMouseListeners() {
+	private void addLeftAndRightListeners() {
 		left.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() != 2)
 					return;
 				
-				right.add(left.getSelectedItem());
+				copySelectedLeftToRight();
+			}
+
+		});
+		
+		left.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					copySelectedLeftToRight();
+				}
 			}
 		});
 		
@@ -104,6 +128,22 @@ public class AlbumManagerWindow extends JFrame {
 				right.remove(right.getSelectedItem());
 			}
 		});
+		
+		right.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DELETE) {
+					right.remove(right.getSelectedItem());
+				}
+			}
+		});
+	}
+	
+	private void copySelectedLeftToRight() {
+		File sel = left.getSelectedItem();
+		
+		if(sel != null)
+			right.add(sel);
 	}
 	
 	private void initBottomPanel() {

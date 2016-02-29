@@ -34,7 +34,7 @@ public class MainWindow extends JFrame {
 		SwingUtils.instanceDefaults(this, 640, 480);
 		setLocationRelativeTo(null);
 	}
-	
+
 	private void initGui() {
 		// TODO cleaner GUI
 		
@@ -119,6 +119,27 @@ public class MainWindow extends JFrame {
 	}
 	
 	private void displayMessage(String msg) {
+		final int msgLenByLine = 150;
+		int msgLen = msg.length();
+		
+		if(msgLen > msgLenByLine) {
+			String[] tokens = msg.split("\\s+");
+			StringBuilder sb = new StringBuilder();
+			
+			int currlen = 0;
+			for(String token : tokens) {
+				sb.append(token + " ");
+				currlen += token.length();
+				
+				if(currlen >= msgLenByLine) {
+					currlen = 0;
+					sb.append(System.lineSeparator());
+				}
+			}
+			
+			msg = sb.toString();
+		}
+		
 		JOptionPane.showMessageDialog(this, msg);
 	}
 
