@@ -77,7 +77,7 @@ public class JPlaylistComponent extends JList<Track> implements ListDataListener
 							boolean hasValidMusicExtension = false;
 							String filename = file.getFileName().toString();
 							
-							for(String extension : Constants.audioSuffixes) {
+							for(String extension : Constants.AUDIO_SUFFIXES) {
 								if(filename.endsWith(extension)) {
 									hasValidMusicExtension = true;
 									break;

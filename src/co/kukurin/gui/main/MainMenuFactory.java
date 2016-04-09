@@ -17,7 +17,7 @@ import co.kukurin.utils.PropertyManager;
 
 @SuppressWarnings("serial")
 public class MainMenuFactory {
-	
+
 	/**
 	 * Static non-instantiable class
 	 */
@@ -83,6 +83,7 @@ public class MainMenuFactory {
 				return;
 			
 			JFileChooser chooser = new JFileChooser(PropertyManager.get(Constants.PROPERTY_OPEN_LOCATION));
+			chooser.setFileFilter(Constants.VLC_FILENAME_FILTER);
 			int result = chooser.showOpenDialog(caller);
 			
 			if(result != JFileChooser.APPROVE_OPTION)
@@ -116,6 +117,7 @@ public class MainMenuFactory {
 			saveLoc = openLoc.getAbsolutePath();
 		
 		JFileChooser chooser = new JFileChooser(saveLoc);
+		chooser.setFileFilter(Constants.VLC_FILENAME_FILTER);
 		int result = chooser.showSaveDialog(caller);
 		
 		if(result != JFileChooser.APPROVE_OPTION)
@@ -129,7 +131,7 @@ public class MainMenuFactory {
 			if(result2 == JOptionPane.NO_OPTION)
 				displaySaveFileDialog(caller);
 		}
-			
+		
 		caller.storeCurrentPlaylist(selected);
 	}
 	

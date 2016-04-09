@@ -2,6 +2,8 @@ package co.kukurin.xml;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
@@ -49,9 +51,9 @@ public class XMLPlaylistUtils {
 		temp.delete();
 		
 		// I don't know of an easier way to prepend the header currently
-		result.createNewFile();
-		Files.write(result.toPath(), Constants.XML_HEADER.getBytes());
-		Files.write(result.toPath(), tempBytes, StandardOpenOption.APPEND);
+		Path pResult = Paths.get(result.getParent().toString() + "/" + filename);
+		Files.write(pResult, Constants.XML_HEADER.getBytes());
+		Files.write(pResult, tempBytes, StandardOpenOption.APPEND);
 	}
 	
 	/**
